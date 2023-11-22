@@ -17,12 +17,12 @@ CONFIG = {
     'PORT': int(os.environ['PORT']),
     'DEBUG': bool(os.environ['DEBUG']),
     'DBHOST': os.environ['MONGODB_HOSTNAME'],
-
 }
 
 # Start Flask app and Api here:
-# app = 
-# api = 
+app = Flask(__name__)
+api = Api(app, prefix='api')
+
 
 # Bind resources to paths here:
 # api.add_resource(...)
@@ -30,4 +30,4 @@ CONFIG = {
 if __name__ == '__main__':
     # Run flask app normally
     # Read DEBUG and PORT from environment variables.
-    pass
+    app.run(port=CONFIG['PORT'], host='0.0.0.0')
