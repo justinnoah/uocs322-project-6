@@ -12,7 +12,6 @@ from flask import request
 
 import acp_times  # Brevet time calculations
 import database as db
-import config
 
 ###
 # Globals
@@ -26,7 +25,11 @@ def init_app():
 
 
 app = init_app()
-CONFIG = config.configuration()
+CONFIG = {
+    'PORT': int(os.environ['PORT']),
+    'DEBUG': bool(os.environ['DEBUG']),
+}
+
 DTFMT = 'YYYY-MM-DDTHH:mm'
 
 # Pages
@@ -173,10 +176,10 @@ def send_worksheet():
 
 #############
 
-app.debug = CONFIG.DEBUG
+app.debug = CONFIG['DEBUG']
 if app.debug:
     app.logger.setLevel(logging.DEBUG)
 
 if __name__ == '__main__':
     print('Opening for global access on port {}'.format(CONFIG['PORT']))
-    app.run(port=CONFIG.PORT, host='0.0.0.0')
+    app.run(port=CONFIG['PORT'], host='0.0.0.0')

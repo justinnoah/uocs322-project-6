@@ -13,6 +13,13 @@ from mongoengine import connect
 # Connect MongoEngine to mongodb
 connect(host=f"mongodb://{os.environ['MONGODB_HOSTNAME']}:27017/brevetsdb")
 
+CONFIG = {
+    'PORT': int(os.environ['PORT']),
+    'DEBUG': bool(os.environ['DEBUG']),
+    'DBHOST': os.environ['MONGODB_HOSTNAME'],
+
+}
+
 # Start Flask app and Api here:
 # app = 
 # api = 
