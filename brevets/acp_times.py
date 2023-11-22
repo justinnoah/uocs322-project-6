@@ -47,7 +47,7 @@ def open_time(control_dist_km, brevet_dist_km, brevet_start_time):
             clamp_km -= dist_over
             # and using the max speed for the brevet control distance add the time to hours_to_shift
             # as well as a fudge factor to make rounding work out
-            hours_to_shift = dist_over / v["max_speed"] + (1 / 120) # + 30sec for rounding reasons
+            hours_to_shift = dist_over / v['max_speed'] + (1 / 120) # + 30sec for rounding reasons
 
     # Separate the floating point value into hours and minutes as a decimal value of hours
     hours, minutes_float = math.modf(hours_to_shift)
@@ -72,7 +72,6 @@ def close_time(control_dist_km, brevet_dist_km, brevet_start_time):
 
     # Round the control km per rules
     rounded_control_km = round(control_dist_km)
-    special = control_dist_km == 434
     # Make sure the control isn't larger than the brevet control distance
     clamp_km = rounded_control_km if brevet_dist_km > rounded_control_km else brevet_dist_km
     # A variable to accumulate the hours to shift

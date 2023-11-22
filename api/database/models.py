@@ -1,4 +1,7 @@
-from mongoengine import *
+from mongoengine import (
+    Document, DateTimeField, EmbeddedDocument, EmbeddedDocumentField,
+    FloatField, ListField, StringField
+)
 
 
 class Checkpoint(EmbeddedDocument):

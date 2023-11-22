@@ -20,7 +20,7 @@ connect(host=f"mongodb://{os.environ['MONGODB_HOSTNAME']}:27017/brevetsdb")
 # Bind resources to paths here:
 # api.add_resource(...)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # Run flask app normally
     # Read DEBUG and PORT from environment variables.
     pass
