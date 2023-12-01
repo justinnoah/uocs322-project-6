@@ -16,20 +16,12 @@ import database as db
 ###
 # Globals
 ###
-def init_app():
-    app = flask.Flask(__name__)
-    with app.app_context():
-        app.before_request(db.db_in_g)
-        db.init_db()
-    return app
-
-
-app = init_app()
+app = flask.Flask(__name__)
 CONFIG = {
     'PORT': int(os.environ['PORT']),
     'DEBUG': bool(os.environ['DEBUG']),
+    'APILOC': str(f"http://{os.environ['API_ADDR']}:{os.environ['API_PORT']}/api")
 }
-
 DTFMT = 'YYYY-MM-DDTHH:mm'
 
 # Pages
@@ -159,18 +151,18 @@ def validate_worksheet(worksheet):
 
 @app.route('/_save_worksheet', methods=['POST'])
 def store_worksheet():
-    worksheet = app.json.loads(request.get_data())
+    worksheet = flask.json.loads(request.get_data())
     app.logger.debug(f'Request Data: {worksheet}')
 
     message = validate_worksheet(worksheet)
     if message == '':
-        db.insert_worksheet(worksheet)
+        db.insert_brevet(worksheet)
 
     return flask.jsonify(message=message)
 
 @app.route('/_restore_worksheet', methods=['GET'])
 def send_worksheet():
-    latest = db.latest_worksheet()
+    latest = db.latest_brevet()
     app.logger.debug('SENDING WORKSHEET: %s' % latest)
     return flask.jsonify(data=latest)
 

@@ -150,15 +150,9 @@
 
             $(document).ready(function(){
               function reset_worksheet() {
-                let brevet_dist = $("#brevet_dist_km option[value='200']").attr("selected", "selected");
-
-                let start_time = $("#begin_date");
-                let km_row_inputs = $("input[name='km']");
-                km_row_inputs.each(function (idx, input) {
-                  console.log("Clearing km in row " + idx);
-                  $(input).val(null).change();
-                });
-                start_time.val('2023-11-07T00:00');
+                $("form").trigger('reset');
+                $("#brevet_dist_km option[value='200']").attr("selected", "selected");
+                $("#begin_date").val('2023-11-07T00:00');
               }
               $('input[name="miles"]').change(
                 function() {
@@ -190,41 +184,67 @@
                   // - Rows with values in the KM field
                   function() {
                     $("#errors").text(" ");
-                    let worksheet_rows = [];
-                    let worksheet = {}
                     let start_time = $("#begin_date").val();
                     let brevet_dist = $("#brevet_dist_km option:selected").val();
+                    let worksheet = {}
+
+                    let worksheet_rows = [];
                     let rows = $('table[class="control_time_table"] > tbody > tr[class="control"]');
-                    console.log("Begin iterating");
-                    $(rows.get().reverse()).each(function (idx, row) {
-                      let col_pre = 'table[class="control_time_table"] > tbody > tr[class="control"]:nth(' + idx + ') > td:nth(';
+                    let row_pre = 'table[class="control_time_table"] > tbody > tr[class="control"]:nth(';
+                    let err_msg = "";
+                    let final_reached = false;
+                    let final_row = 0;
+
+                    $(rows).each(function (idx, row) {
+                      let col_pre = row_pre + idx + ') > td:nth(';
                       let km = col_pre + '1) > input';
                       let loc = col_pre + '2) > input';
+                      let open = col_pre + '3) > input';
+                      let close = col_pre + '4) > input';
+
                       let worksheet_row = {};
                       worksheet_row['row_id'] = parseInt(idx);
                       worksheet_row['km'] = parseInt($(km).val());
                       worksheet_row['loc'] = $(loc).val();
-                      worksheet_rows.push(worksheet_row);
+                      worksheet_row['open'] = $(open).val();
+                      worksheet_row['close'] = $(close).val();
+
+                      if ((final_reached == true) && (worksheet_row['km'] > 0)) {
+                        err_msg = "Unexpected value for km at row " + idx;
+                      }
+                      if ((idx == 0) && (worksheet_row['km'] != 0)) {
+                        err_msg = "First row kilometers must be 0.";
+                      }
+                      if ((err_msg == "") && (final_reached != true) && ($(km).val() != "")) {
+                        worksheet_rows.push(worksheet_row);
+                      }
+                      if ((idx > 0) && ($(km).val() == "")) {
+                        final_reached = true;
+                      }
                     });
-                    worksheet["worksheet"] = worksheet_rows;
-                    worksheet["start_time"] = start_time;
-                    worksheet["brevet_dist"] = brevet_dist;
-                    $.ajax({
-                      type: 'POST',
-                      url: '/_save_worksheet',
-                      data: JSON.stringify(worksheet),
-                      contentType: "application/json",
-                      complete: (data, status_msg) => {
-                        let msg = data.responseJSON.message;
-                        if (msg != "") {
-                          $("#errors").css('color', 'red').text(msg);
-                        } else {
-                          $("#errors").css('color', 'green').text("Successfully submitted worksheet.");
-                          reset_worksheet();
-                        }
-                      },
-                      dataType: 'json'
-                    });
+                    if (err_msg == "") {
+                      worksheet["worksheet"] = worksheet_rows;
+                      worksheet["start_time"] = start_time;
+                      worksheet["brevet_dist"] = brevet_dist;
+                      $.ajax({
+                        type: 'POST',
+                        url: '/_save_worksheet',
+                        data: JSON.stringify(worksheet),
+                        contentType: "application/json",
+                        complete: (data, status_msg) => {
+                          let msg = data.responseJSON.message;
+                          if (msg != "") {
+                            $("#errors").css('color', 'red').text(msg);
+                          } else {
+                            $("#errors").css('color', 'green').text("Successfully submitted worksheet.");
+                            reset_worksheet();
+                          }
+                        },
+                        dataType: 'json'
+                      });
+                    } else {
+                      $("#errors").css('color', 'red').text(err_msg);
+                    }
                   }
               );
               $('input[name="DisplayWorksheetButton"]').on('click', 
