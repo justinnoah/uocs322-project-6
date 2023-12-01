@@ -1,6 +1,7 @@
 """
 Resource: Brevet
 """
+import flask
 from flask import Response, request
 from flask_restful import Resource
 
@@ -9,11 +10,26 @@ from database.models import Brevet as BrevetModel
 
 class Brevet(Resource):
     def get(self, id):
-        pass
+# return Response(json_object, mimetype="application/json", status=200)
+
+        return Response(
+            BrevetModel.objects().find_one(_id=id).to_json(),
+            mimetype="application/json",
+            status=200
+        )
     def delete(self, id):
-        pass
+        return Response(
+            BrevetModel.objects().find_one(_id=id).delete().to_json(),
+            mimetype="application/json",
+            status=200
+        )
     def put(self, id):
-        pass
+        bdict = flask.json.loads(request.get_data())
+        return Response(
+            BrevetModel.objects().find_one(_id=id).update_one(upsert=True, **bdict).to_json(),
+            mimetype="application/json",
+            status=200
+        )
 
 # MongoEngine queries:
 # Brevet.objects() : similar to find_all. Returns a MongoEngine query
@@ -34,4 +50,4 @@ class Brevet(Resource):
 # So when you're returning a brevet / brevets, you need to convert
 # it from a MongoEngine query object to a JSON and send back the JSON
 # directly instead of letting Flask-RESTful attempt to convert it to a
-# JSON for you.
+# JSON fr you.

@@ -34,8 +34,11 @@ class Brevets(Resource):
                 'checkpoints': checkpoints
         }
         brevet = BrevetModel(**brevet_dict)
-        brevet.save()
-        return ""
+        return Response(
+            brevet.save().to_json(),
+            mimetype="application/json",
+            status=200
+        )
 
 # MongoEngine queries:
 # Brevet.objects() : similar to find_all. Returns a MongoEngine query
