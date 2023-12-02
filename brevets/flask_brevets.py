@@ -162,9 +162,28 @@ def store_worksheet():
 
 @app.route('/_restore_worksheet', methods=['GET'])
 def send_worksheet():
+    # Translate the Brevet Model fields to the front-end's fields for brevets
     latest = db.latest_brevet()
-    app.logger.debug('SENDING WORKSHEET: %s' % latest)
-    return flask.jsonify(data=latest)
+    brevet = {}
+    # Well, translate if there is one to translate
+    if latest is not None:
+        brevet['id'] = latest['_id']['$oid']
+        brevet['start_time'] = arrow.get(latest['start_time']['$date']).format(DTFMT)
+        brevet['brevet_dist'] = latest['length']
+        flask.current_app.logger.debug(f"LATEST: {latest}")
+        flask.current_app.logger.debug(f"BREVET: {brevet}")
+        checkpoints = []
+        for rid, checkpoint in enumerate(latest['checkpoints']):
+            cp = {}
+            cp['loc'] = checkpoint['location']
+            cp['open'] =  arrow.get(checkpoint['open_time']['$date']).format(DTFMT)
+            cp['close'] = arrow.get(checkpoint['close_time']['$date']).format(DTFMT)
+            cp['km'] = checkpoint['distance']
+            cp['row_id'] = rid
+            checkpoints.append(cp)
+        brevet['worksheet'] = checkpoints
+
+    return flask.jsonify(data=brevet)
 
 #############
 

@@ -19,10 +19,11 @@ def insert_brevet(worksheet):
     requests.post(f"{api}/brevets", data=json.dumps(ws))
 
 def latest_brevet():
-    brevets_json = requests.get(f"{api}/brevets").json()
-    brevets = sorted(flask.json.loads(brevets_json), reverse=True)
+    brevets = requests.get(f"{api}/brevets").json()
+    latest = None
     if len(brevets) > 0:
-        return brevets[0]
-    else:
-        return []
+        latest = brevets[-1]
+    return latest
+
+
 
