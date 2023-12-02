@@ -1,72 +1,50 @@
 # UOCIS322 - Project 6 #
-Brevet time calculator with MongoDB, and a RESTful API!
 
-Read about MongoEngine and Flask-RESTful before you start: [http://docs.mongoengine.org/](http://docs.mongoengine.org/), [https://flask-restful.readthedocs.io/en/latest/](https://flask-restful.readthedocs.io/en/latest/).
+### Author: Justin Noah
 
-## Before you begin
-You *HAVE TO* copy `.env-example` into `.env` and specify your container port numbers there!
-Note that the default values (5000 and 5000) will work!
+### Contact: jnoah@uoregon.edu
 
-*DO NOT PLACE LOCAL PORTS IN YOUR COMPOSE FILE!*
+### Description
 
-## Overview
+This project is an ACP Brevet time calculator. Any brevets submitted are added to a mongo database and the last brevet submitted using the 'Submit' button can be retrieved using the 'Display' button.
 
-You will reuse your code from Project 5, which already has two services:
+This webapp front-end is written with bootstrap and jquery as well as HTML/CSS/JavaScript. The front-end communicates with the back-end python/flask app. In turn the back-end communicates with another service called api, which manages the MongoDB storage backend. The front-end never touches api.
 
-* Brevets
-	* The entire web service
-* MongoDB
+In total, there are three docker services for this project:
+- brevets - HTML/CSS/JavaScript, jQuery, Bootstrap front-end served by a python/flask back-end.
+- api - A python/flask/flask-restful RESTful API the brevets back-end uses to communicate with the MongoDB storage service
+- db - A standalone MongoDB service, communicated to (only) by the api service
 
-For this project, you will re-organize `Brevets` into two separate services:
+### Algorithm
 
-* Web (Front-end)
-	* Time calculator (basically everything you had in project 4)
-* API (Back-end)
-	* A RESTful service to expose/store structured data in MongoDB.
+#### Open
+To calculate the open time: control distance is rounded and clamped at the brevet control distance, then all brevet controls are iterated through and if the clamped distance is over the control distance, the control distance is subtracted from the clamped distance and divided by that control's max speed. This time is then the time to shift by and is added to the brevet start time resulting in the opening time.
 
-## Tasks
+#### Close
+To calculate the close time: like with the open method, close starts by clamping the control time at the brevet control distance. Then special cases are considered, such as the control is less than or equal to 60km case and the control distance being the same as the brevet control distance. If the control is not special, then the method iterates through the brevet controls. While iterating, firstly, any brevet control distances above the given brevet control distance is skipped. Then the method checks if the clamped distance is between two brevet controls. If so, it then checks for a clampped distance less than 600 and simply divides the control by the min speed of 15kph if so, otherwise it adds the max time for the 600km brevet and adds the remainder distance divided by the minimum speed for that control (601km-1000km is 11.428kph). The start time is then shifted by the time calculated resulting in the closing time.
 
-* Implement a RESTful API in `api/`:
-	* Write a data schema using MongoEngine for Checkpoints and Brevets:
-		* `Checkpoint`:
-			* `distance`: float, required, (checkpoint distance in kilometers), 
-			* `location`: string, optional, (checkpoint location name), 
-			* `open_time`: datetime, required, (checkpoint opening time), 
-			* `close_time`: datetime, required, (checkpoint closing time).
-		* `Brevet`:
-			* `length`: float, required, (brevet distance in kilometers),
-			* `start_time`: datetime, required, (brevet start time),
-			* `checkpoints`: list of `Checkpoint`s, required, (checkpoints).
-	* Using the schema, build a RESTful API with the resource `/brevets/`:
-		* GET `http://API:PORT/api/brevets` should display all brevets stored in the database.
-		* GET `http://API:PORT/api/brevet/ID` should display brevet with id `ID`.
-		* POST `http://API:PORT/api/brevets` should insert brevet object in request into the database.
-		* DELETE `http://API:PORT/api/brevet/ID` should delete brevet with id `ID`.
-		* PUT `http://API:PORT/api/brevet/ID` should update brevet with id `ID` with object in request.
+### Setup and Usage Instructions
 
-* Copy over `brevets/` from your completed project 5.
-	* Replace every database related code in `brevets/` with calls to the new API.
-		* Remember: AutoGrader will ensure there is NO CONNECTION between `brevets` and `db` services. `brevets` should only operate through `api` and still function the way it did in project 5.
-		* Hint: Submit should send a POST request to the API to insert, Display should send a GET request, and display the last entry.
-	* Remove `config.py` and adjust `flask_brevets.py` to use the `PORT` and `DEBUG` values specified in env variables (see `docker-compose.yml`).
+Run:
 
-* Update README.md with API documentation added.
+```docker compose up --build```
 
-As always you'll turn in your `credentials.ini` through Canvas.
+Use:
 
-## Grading Rubric
+Open ```http://localhost:5002``` in your favorite browser
 
-* If your code works as expected: 100 points. This includes:
-    * API routes as outlined above function exactly the way expected,
-    * Web application works as expected in project 5,
-    * README is updated with the necessary details.
+---------------------
 
-* If the front-end service does not work, 20 points will be docked.
+Sources:
 
-* For each of the 5 requests that do not work, 15 points will be docked.
+https://mongodb.com
 
-* If none of the above work, 5 points will be assigned assuming project builds and runs, and `README` is updated. Otherwise, 0 will be assigned.
+https://pymongo.readthedocs.io
 
-## Authors
+https://developer.mozilla.org
 
-Michal Young, Ram Durairajan. Updated by Ali Hassani.
+https://docs.docker.com
+
+https://stackoverflow.com/questions/1394020/jquery-each-backwards
+
+https://stackoverflow.com/questions/499405/change-the-selected-value-of-a-drop-down-list-with-jquery
